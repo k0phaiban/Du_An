@@ -2,7 +2,7 @@
     <div>
         <sidebar :listOption="listSetting" :type="1"></sidebar>
         <div class="body-content">
-            vào
+            <router-view></router-view>
         </div>
     </div>
 </template>
@@ -19,19 +19,23 @@ export default {
                     ID: 1,
                     Name: "Không thời hạn",
                     Active: true,
-                    Router: "/share/indefinite"
+                    Router: "/share/indefinite",
+                    // Icon: "icon-delete"
+                    Icon:""
                 },
                 {
                     ID: 2,
                     Name: "Có thời hạn",
                     Active: false,
-                    Router: "/share/time"
+                    Router: "/share/time",
+                    Icon: ""
                 },
                 {
                     ID: 3,
-                    Name: "Nhận chia sẽ",
+                    Name: "Nhận chia sẻ",
                     Active: false,
-                    Router: "/share/receive"
+                    Router: "/share/receive",
+                    Icon: ""
                 }
             ]
         }

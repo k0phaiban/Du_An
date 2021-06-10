@@ -29,7 +29,7 @@ namespace Upload.Implement
             _tableName = tableName;
         }
         //Hàm get all
-        public async Task<object> GetAll<T>(Type curentType)
+        public virtual async Task<object> GetAll<T>(Type curentType)
         {
             var resul = await _dBConnection.QueryAsync<T>($"SELECT * FROM {_tableName};", commandType: CommandType.Text);
             return resul;
@@ -39,7 +39,8 @@ namespace Upload.Implement
         {
             var startIndex = (pagingRequest.PageIndex - 1) * pagingRequest.PageSize + 1;
             var endIndex = pagingRequest.PageIndex * pagingRequest.PageSize;
-            string commandText = $"SELECT * FROM (SELECT * , row_number() OVER (order by {curentType.Name}ID) AS row_num FROM {_tableName}) t WHERE row_num BETWEEN {startIndex} AND {endIndex} ORDER BY {curentType.Name}ID;";
+            string where = string.IsNullOrEmpty(pagingRequest.Filter) ? "" : pagingRequest.Filter + "AND";
+            string commandText = $"SELECT * FROM (SELECT * , row_number() OVER (order by {curentType.Name}ID) AS row_num FROM {_tableName}) t WHERE {where} row_num BETWEEN {startIndex} AND {endIndex} ORDER BY {curentType.Name}ID;";
             var resul = await _dBConnection.QueryAsync<T>(commandText, commandType: CommandType.Text);
             return resul;
         }
@@ -52,9 +53,22 @@ namespace Upload.Implement
         //Hàm insert chung
         public async Task<object> Insert(object param, Type curentType)
         {
+            await BeforeSave(param);
             var parameters = GetParameters(param, curentType);
-            var resul =  await _dBConnection.ExecuteAsync($"Proc_{curentType.Name}_Insert", parameters, commandType: CommandType.StoredProcedure);
+            var resul =  await _dBConnection.ExecuteScalarAsync<object>($"Proc_{curentType.Name}_Insert", parameters, commandType: CommandType.StoredProcedure);
+            if(resul != null)
+            {
+                await AfterSave(param);
+            }
             return resul;
+        }
+        public virtual async Task BeforeSave(object param)
+        {
+
+        }
+        public virtual async Task AfterSave(object param)
+        {
+
         }
         //Hàm sửa chung
         public async Task<object> Update(object param, Type curentType)
@@ -119,6 +133,10 @@ namespace Upload.Implement
             res.Code = 99;
             res.Message = e.Message;
             return res;
+        }
+        public async Task<object> QueryAsync<T>(string sql)
+        {
+            return await _dBConnection.QueryAsync<T>(sql);
         }
     }
 }

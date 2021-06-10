@@ -7,6 +7,9 @@
             :placeholder="placeholderInput"
             :display-expr="displayField"
             :value-expr="valueField"
+            :searchEnabled="true"
+            :searchExpr="[displayField]"
+            noDataText="Không có dữ liệu"
             @selectionChanged="changeSelect"
           />
     </div>
@@ -49,8 +52,8 @@ export default {
     },
     methods: {
         changeSelect(data){
-            this.$emit("input", data.value[valueField]);
-            this.$emit("selected", data.value);
+            this.$emit("input", data.selectedItem[this.valueField]);
+            this.$emit("selected", data.selectedItem);
         }
     }
 }

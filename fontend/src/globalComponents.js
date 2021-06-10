@@ -26,6 +26,17 @@ const ccSelectBox = () => import(/* webpackChunkName:'ccSelectBox' */ '@/compone
 Vue.component('ccSelectBox', ccSelectBox);
 const ccOrganizationUnit = () => import(/* webpackChunkName:'ccOrganizationUnit' */ '@/components/organization-unit/CCOrganizationUnit.vue');
 Vue.component('ccOrganizationUnit', ccOrganizationUnit);
+const ccIcon = () => import(/* webpackChunkName:'ccIcon' */ '@/components/button/ccIcon.vue');
+Vue.component('ccIcon', ccIcon);
 
+const ccDate = () => import(/* webpackChunkName:'ccIcon' */ '@/components/date/CCDate.vue');
+Vue.component('ccDate', ccDate);
 const ccPopup = () => import(/* webpackChunkName:'ccPopup' */ '@/components/popup/CCPopup.vue');
 Vue.component('ccPopup', ccPopup);
+
+const ccLoading = () => import(/* webpackChunkName:'ccLoading' */ '@/components/loading/ccLoading.vue');
+Vue.component('ccLoading', ccLoading);
+const ccRadio = () => import(/* webpackChunkName:'ccRadio' */ '@/components/radio/ccRadio.vue');
+Vue.component('ccRadio', ccRadio);
+const ccCheckBox = () => import(/* webpackChunkName:'ccCheckBox' */ '@/components/checkbox/ccCheckBox.vue');
+Vue.component('ccCheckBox', ccCheckBox);

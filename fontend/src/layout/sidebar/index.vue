@@ -3,12 +3,13 @@
         <div v-if="type == 1">
             <div v-for="(item,index) in listOption" :key="index">
                 <div class="item" :class="{'active': item.Active}" @click="changeRouter(item)">
-                    {{item.Name}}
+                    <div :class="[item.Icon]"></div>{{item.Name}}
                 </div>
             </div>
         </div>
         <div v-if="type == 2">
             <DxTreeView
+                :value="valueOrg"
                 ref="treeViewOrg"
                 :data-source="dataSource"
                 :select-by-click="true"
@@ -20,10 +21,34 @@
                 @item-click="selectItem"
             />
         </div>
+        <div v-if="type == 3">
+            <div class="flex header-sidebar">
+                <div class="item-sidebar item-right" :class="[{'item-active': !activeQuickSearch}]" @click="selectQuickSearch(false)">
+                    Tất cả
+                </div>
+                <div class="item-sidebar" :class="[{'item-active': activeQuickSearch}]" @click="selectQuickSearch(true)">
+                    Ghim
+                </div>
+            </div>
+            <DxTreeView
+                :value="valueFile"
+                ref="treeViewFile"
+                :data-source="dataSourceFile"
+                :select-by-click="true"
+                data-structure="plain"
+                key-expr="FileID"
+                parent-id-expr="ParentID"
+                selection-mode="single"
+                display-expr="FileName"
+                expandExpr="Expanded"
+                @item-click="selectItemFile"
+            />
+        </div>
     </div>
 </template>
 <script>
 import DxTreeView from 'devextreme-vue/tree-view';
+import OrganizationUnitAPI from "@/api/Components/OrganizationUnitAPI.js";
 export default {
     components:{
         DxTreeView
@@ -36,33 +61,49 @@ export default {
         listOption: {
             Type: Array,
             default: () => []
+        },
+        value: {
+            Type: Array,
+            default: () => []
+        },
+        dataSourceFile: {
+            Type: Array,
+            default: () => []
+        },
+        selectedFileID: {
+            Type: Number,
+            default: 0
         }
     },
     data(){
         return{
-            value: [],
             dataSource: [
-                {
-                    OrganizationUnitID: 1,
-                    OrganizationUnitName: "ĐHQG Hà Nội",
-                    ParentID: 0
-                },
-                {
-                    OrganizationUnitID: 2,
-                    OrganizationUnitName: "ĐHQG Hà Nội",
-                    ParentID: 1
-                },
-                {
-                    OrganizationUnitID: 3,
-                    OrganizationUnitName: "ĐHQG Hà Nội",
-                    ParentID: 1
-                },
-                {
-                    OrganizationUnitID: 4,
-                    OrganizationUnitName: "ĐHQG Hà Nội",
-                    ParentID: 2
-                }
             ],
+            activeQuickSearch: false,
+            valueFile: null,
+            valueOrg: null,
+            listExpanded: []
+        }
+    },
+    watch:{
+        value: {
+            handler(val){
+                if(this.type == 3 && val){
+                    this.$refs.treeViewFile.instance.selectItem(val);
+                }
+            }
+        },
+        dataSourceFile: {
+            handler(val){
+                if(val){
+                    this.dataSourceFile.forEach(element => {
+                        if(element.ParentID == 0){
+                            element["Expanded"] = true;
+                        }
+                    });
+                }
+            },
+            immediate: true
         }
     },
     methods: {
@@ -79,10 +120,32 @@ export default {
                 }
             })
             this.$router.push("/home" + item.Router);
+        },
+        async getDataSource(){
+            let me = this;
+            var res = await OrganizationUnitAPI.GetAll();
+            if(res.data && res.data.Success){
+                me.dataSource = res.data.Data;
+                me.valueOrg = me.dataSource[0].OrganizationUnitID;
+                me.dataSource[0]["selected"] = true;
+            }
+        },
+        selectQuickSearch(val){
+            this.activeQuickSearch = val;
+            this.$refs.treeViewFile.instance.unselectAll();
+            this.$emit("quickSearch", val);
+        },
+        selectItemFile(data){
+            if(!data.itemData["selected"]){
+                this.$emit("selectedFile", data.itemData);
+            }
+            else{
+                this.$emit("selectedFile", null);
+            }
         }
     },
-    created(){
-       
+    async created(){
+       await this.getDataSource();
     }
 }
 </script>
@@ -119,7 +182,6 @@ export default {
     .dx-treeview-item{
         display: flex;
         vertical-align: middle;
-        height: 34px;
         padding: 5px 8px;
         border-radius: 4px;
         margin-bottom: 2px;
@@ -172,6 +234,27 @@ export default {
     }
     .dx-treeview-node{
         padding-left: 20px;
+    }
+    .header-sidebar{
+        height: 40px;
+        align-items: center;
+        margin-bottom: 8px;
+        .item-sidebar{
+            padding: 8px 16px;
+            border-bottom: 1px solid #dddddd;
+            background-color: #304FFE;
+            color: #ffffff;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        .item-right{
+            border-right: 1px solid #dddddd;
+        }
+        .item-active{
+            border-bottom: 1px solid #ffffff;
+            color: #524aff !important;
+            background-color: #ffffff;
+        }
     }
 }
 </style>

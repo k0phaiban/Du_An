@@ -1,11 +1,25 @@
 <template>
-    <div class="cc-input"
+    <div class="cc-input" 
+        :style="[{'width': isNaN(width) ? width : width + 'px'},
+            {'height': isNaN(height) ? height : height + 'px'}
+        ]"
+        @keyup.enter="handlekeyup"
     >
-        <DxTextBox :value="value"
+        <div v-if="icon" class="icon-input">
+            <div :class="icon"></div>
+        </div>
+        <DxTextBox 
+            :value="value"
+            :class="{'show-icon' : icon}"
             :mode="mode"
             :placeholder="placeholderInput"
+            :disabled="disabled"
+            height="100%"
             @value-changed="valueChanged"
         />
+        <div v-if="iconTails" class="icon-input-tails" @click="clickIconTail">
+            <div :class="iconTails"></div>
+        </div>
     </div>
 </template>
 <script>
@@ -30,6 +44,22 @@ export default {
         icon: {
             Type: String,
             default: null
+        },
+        iconTails: {
+            Type: String,
+            default: null
+        },
+        width: {
+            Type: [String,Number],
+            default: "100%"
+        },
+        height: {
+            Type: [String,Number],
+            default: "36px"
+        },
+        disabled: {
+            type: [String,Boolean],
+            default: false
         }
     },
     data() {
@@ -43,22 +73,47 @@ export default {
     methods: {
         valueChanged(data){
             this.$emit("input", data.value);
+        },
+        handlekeyup(e){
+          this.$emit('handlekeyup',this.value);  
+        },
+        clickIconTail() {
+            this.$emit("clickIcon")
         }
     }
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .cc-input{
-    width: 100%;
-    height: 36px;
+    position: relative;
+    min-width: 200px;
     border-radius: 4px;
-    input{
+    .dx-texteditor-input{
         width: calc(100% - 16px);
         height: 34px;
         border: none;
         outline: none;
         border-radius: 4px;
         padding: 0 8px;
+    }
+    .show-icon .dx-texteditor-input{
+        padding: 0 8px 0 32px !important;
+    }
+    .show-icon .dx-placeholder{
+        padding: 0 8px 0 24px !important;
+    }
+    .icon-input{
+        position: absolute;
+        top: 6px;
+        left: 6px;
+    }
+    .icon-input-tails {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+    }
+    .dx-state-disabled .dx-widget, .dx-state-disabled.dx-widget{
+        opacity: unset;
     }
 }
 </style>

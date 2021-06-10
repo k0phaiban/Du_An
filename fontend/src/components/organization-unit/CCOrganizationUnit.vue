@@ -1,8 +1,10 @@
 <template>
-  <div class="cc-organization-unit">
+  <div class="cc-organization-unit" :style="[{'width': isNaN(width) ? width : width + 'px'}
+        ]">
     <DxDropDownBox
+        ref="dropbox"
         :value="value"
-        :show-clear-button="true"
+        :show-clear-button="false"
         :data-source="treeDataSource"
         value-expr="OrganizationUnitID"
         display-expr="OrganizationUnitName"
@@ -29,6 +31,7 @@
 <script>
 import DxDropDownBox from 'devextreme-vue/drop-down-box';
 import DxTreeView from 'devextreme-vue/tree-view';
+import OrganizationUnitAPI from "@/api/Components/OrganizationUnitAPI.js";
 
 import 'whatwg-fetch';
 
@@ -38,13 +41,17 @@ export default {
     DxTreeView,
   },
   props: {
-      value: {
-        
-      },
-      mode: {
-          Type: String,
-          default: "single"
-      }
+    value: {
+      
+    },
+    mode: {
+        Type: String,
+        default: "single"
+    },
+    width: {
+      type: [String, Number],
+      default: "100%"
+    }
   },
   data() {
     return {
@@ -52,11 +59,22 @@ export default {
       treeViewRefName: 'tree-view'
     };
   },
+  watch: {
+    value: {
+      handler(val){
+        if(this.mode == "single"){
+          if(this.$refs["dropbox"]){
+            this.$refs["dropbox"].instance.close();
+          }
+        }
+      }
+    }
+  },
   async created() {
-      //await this.getAll();
+    await this.getAll();
   },
   methods: {
-    /* syncTreeViewSelection() {
+    syncTreeViewSelection() {
       if (!this.$refs[this.textBoxRefName]) return;
       if (!this.value) {
         this.$refs[this.textBoxRefName].instance.unselectAll();
@@ -79,24 +97,24 @@ export default {
         numberZero = numberZero - 1;
       }
       ccCode = ccCode + number.toString();
-      this.$emit("childCode",ccCode);
+      this.$emit("childCode",e.itemData.Code + ccCode + "/");
     },
     async getAll(){
         var res = await OrganizationUnitAPI.GetAll();
         if(res.data && res.data.Success){
             this.treeDataSource = res.data.Data;
         }
-    } */
+    }
   }
 };
 </script>
 <style lang="scss">
 .cc-organization-unit{
-    width: 100%;
+    
 }
 .dx-treeview-item-without-checkbox.dx-state-focused > .dx-treeview-item {
     background-color: #e3f0ff;
-    color: #0075FF;
+    color: #212121;
     border-radius: 4px;
 }
 .dx-treeview-item-without-checkbox.dx-state-selected > .dx-treeview-item {
